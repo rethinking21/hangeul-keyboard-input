@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1352566B-1104-4302-9954-1FF378712254}</ProjectGuid>
+    <ProjectGuid>{79AF99AE-8717-4DB2-A25D-92BFA813D634}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>HangeulKeyBoard</RootNamespace>
     <AssemblyName>HangeulKeyBoard</AssemblyName>

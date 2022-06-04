@@ -10,7 +10,6 @@ namespace HangeulKeyBoard
     {
         static void Main(string[] args)
         {
-
         }
     }
 }
