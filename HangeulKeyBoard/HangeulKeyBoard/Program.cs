@@ -10,6 +10,7 @@ namespace HangeulKeyBoard
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("asdfg".Contains('a'));
         }
     }
 }
