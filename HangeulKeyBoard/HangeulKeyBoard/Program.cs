@@ -10,7 +10,12 @@ namespace HangeulKeyBoard
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("asdfg".Contains('a'));
+            Console.WriteLine(Convert.ToInt32('힣'));
+            Console.WriteLine(Convert.ToInt32('ㅎ'));
+            Console.WriteLine(Convert.ToInt32('ㅣ'));
+            Console.WriteLine(Convert.ToInt32('ᄒ'));
+            Console.WriteLine(Convert.ToInt32('ᅵ'));
+            Console.WriteLine(Convert.ToInt32('ᇂ'));
         }
     }
 }
