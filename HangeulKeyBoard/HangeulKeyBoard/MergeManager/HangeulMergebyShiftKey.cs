@@ -8,6 +8,7 @@ namespace HangeulKeyBoard.MergeManager
 {
     public class HangeulMergebyShiftKey : IHangeulMerge
     {
+        #region declaration
         public class MergeSetting
         {
             //아직 안만듬
@@ -15,6 +16,8 @@ namespace HangeulKeyBoard.MergeManager
         }
 
         public MergeSetting setting;
+
+        #region Hanguel Index
 
         //기본 초중종성 조합 (종성은 없는 경우도 있음을 주의할것 +1 해야함)
         private readonly char[] firstIndex = { 
@@ -31,10 +34,10 @@ namespace HangeulKeyBoard.MergeManager
         private readonly char[] lastIndex = {
             'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 
             'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
-            'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 
-            'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 
-            'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 
-            'ㅎ' };
+            'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ',
+            'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 
+            'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 
+            'ㅍ', 'ㅎ' };
 
         private readonly Dictionary<(int _base, int _add), int> middleAddDict = new Dictionary<(int _base, int _add), int>()
         {
@@ -49,47 +52,71 @@ namespace HangeulKeyBoard.MergeManager
 
         private readonly Dictionary<(int _base, int _add), int> lastAddDict = new Dictionary<(int _base, int _add), int>()
         {
-            {(0,20), 1},
-            {(3,23), 4},
-            {(3,29), 5},
-            {(8, 0), 9},
-            {(8, 16), 10},
-            {(8, 17), 11},
-            {(8, 20), 12},
-            {(8, 27), 13},
-            {(8, 28), 14},
-            {(8, 29), 15},
-            {(17, 20), 19},
+            {(0, 18), 2}, //ㄳ
+            {(3, 21), 4}, //ㄵ
+            {(3, 26), 5}, //ㄶ
+            {(7, 0), 8}, //ㄺ
+            {(7, 15), 9}, //ㄻ
+            {(7, 16), 10}, //ㄼ
+            {(7, 18), 11}, //ㄽ
+            {(7, 24), 12}, //ㄾ
+            {(7, 25), 13}, //ㄿ
+            {(7, 26), 14}, //ㅀ
+            {(16, 18), 17}, //ㅄ
         };
 
+        //유니코드 배열 자음 -> 초성
+        private readonly Dictionary<int, int> consonantToFirstDict = new Dictionary<int, int>()
+       {
+           {0, 0}, {1, 1}, {3, 2}, {6, 3}, {7, 4},
+           {8, 5}, {16, 6}, {17, 7}, {18, 8}, {20, 9},
+           {21, 10}, {22, 11}, {23, 12}, {24, 13}, {25, 14},
+           {26, 15}, {27, 16}, {28, 17}, {29, 18},
+       };
+
+        //유니코드 배열 자음 -> 종성
+        private readonly Dictionary<int, int> consonantToLastDict = new Dictionary<int, int>()
+        {
+            {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4},
+            {5, 5}, {6, 6}, {8, 7}, {9, 8}, {10, 9},
+            {11, 10}, {12, 11}, {13, 12}, {14, 13}, {15, 14},
+            {16, 15}, {17, 16}, {19, 17}, {20, 18}, {21, 19},
+            {22, 20}, {24, 21}, {25, 22}, {26, 23}, {27, 24},
+            {28, 25}, {29, 26}
+        };
+
+        //들어올 수 있는 자음 입력값
         private readonly char[] hangeulConsonantInput = {
             'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ',
             'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
             'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ',
             'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' };
+        //들어올 수 있는 모음 입력값
         private readonly char[] hangeulVowelInput = {
             'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ',
             'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ', 
             'ㅐ', 'ㅒ', 'ㅔ', 'ㅖ' };
-        
 
+        #endregion
+
+        
         private char? subString;
         private List<int?> charList = new List<int?>();
         private bool isPoped;
         private bool isHanguel;
         private bool hasVowel;
 
-        //Clear
-        public void Clear()
-        {
-            charList.Clear();
-            subString = null;
-            hasVowel = false;
-            isPoped = false;
-            hasVowel = false;
-            isHanguel = true;
-        }
+        #endregion
 
+
+        #region Show Merge
+        public char? ShowMerge()
+        {
+            return subString;
+        }
+        #endregion
+
+        #region MergeAndPop
         //문자를 합친 다음 내보냅니다.
         public char? MergeAndPop()
         {
@@ -102,15 +129,13 @@ namespace HangeulKeyBoard.MergeManager
             charList.Clear();
             return subString;
         }
+        #endregion
 
-        public char? ShowMerge()
-        {
-            return subString;
-        }
-
+        #region canMerge
         //문자를 합칠 수 있는지 확인합니다.
         private bool canMerge(char _key)
         {
+            return true;
             if(subString == null)
             {
                 //입력창이 비어있는 경우
@@ -128,7 +153,9 @@ namespace HangeulKeyBoard.MergeManager
                 return false;
             }
         }
+        #endregion
 
+        #region InputKey
         //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
         public char? InputKey(char _key)
         {
@@ -151,6 +178,9 @@ namespace HangeulKeyBoard.MergeManager
                 return subString;
             }
         }
+        #endregion
+
+        #region Merge
 
         private void Merge(char? _key)
         {
@@ -197,20 +227,20 @@ namespace HangeulKeyBoard.MergeManager
                             }
                             else
                             {
-                                tempHangeul[0] = tempInt - BasicUnicode.consonant + BasicUnicode.firstLetter;
+                                tempHangeul[0] = consonantToFirstDict[tempInt - BasicUnicode.consonant] + BasicUnicode.firstLetter;
                             }
                         }
                         else
                         {
                             //종성
-                            if (tempHangeul[3] == null)
+                            if (tempHangeul[2] == null)
                             {
                                 //더 좋은 방법?
-                                tempHangeul[3] = Array.IndexOf(lastIndex, tempInt) + BasicUnicode.lastLetter;
+                                tempHangeul[2] = Array.IndexOf(lastIndex, Convert.ToChar(tempInt)) + BasicUnicode.lastLetter;
                             }
                             else
                             {
-                                tempHangeul[3] = lastAddDict[((int)tempHangeul[3] - BasicUnicode.lastLetter, tempInt - BasicUnicode.consonant)]
+                                tempHangeul[2] = lastAddDict[((int)tempHangeul[2] - BasicUnicode.lastLetter, consonantToLastDict[tempInt - BasicUnicode.consonant])]
                                     + BasicUnicode.lastLetter;
                             }
 
@@ -218,7 +248,40 @@ namespace HangeulKeyBoard.MergeManager
                     }
                 }
                 //합치기!
+                if (tempHangeul[0] == null)
+                {
+                    subString = Convert.ToChar(tempHangeul[1]);
+                    return;
+                }else if (tempHangeul[1] == null)
+                {
+                    subString = Convert.ToChar(tempHangeul[0]);
+                    return;
+                }
+                else if(tempHangeul[2] == null)
+                {
+                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 );
+                    return;
+                }
+                else
+                {
+                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 + tempHangeul[2] - BasicUnicode.lastLetter + 1);
+                    return;
+                }
             }
+        }
+
+        #endregion
+
+        #region Clear
+        //Clear
+        public void Clear()
+        {
+            charList.Clear();
+            subString = null;
+            hasVowel = false;
+            isPoped = false;
+            hasVowel = false;
+            isHanguel = true;
         }
 
         private void Clear(char? _key)
@@ -253,11 +316,16 @@ namespace HangeulKeyBoard.MergeManager
             }
         }
 
+        #endregion
+
+        #region main Func
         public HangeulMergebyShiftKey()
         {
             setting = new MergeSetting();
-            setting.mergeDoubleConsonant = true;
+            setting.mergeDoubleConsonant = false;
             isPoped = false;
         }
+
+        #endregion
     }
 }

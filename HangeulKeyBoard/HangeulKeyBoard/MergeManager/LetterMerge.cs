@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HangeulKeyBoard.MergeManager
 {
+    #region IHangeulMerge
     public interface IHangeulMerge
     {
         //clear
@@ -17,7 +18,9 @@ namespace HangeulKeyBoard.MergeManager
         //키를 입력받으면서 조건이 되면 뱉어냅니다.
         char? InputKey(char _key);
     }
+    #endregion
 
+    #region BasicUnicode(int)
     public class BasicUnicode
     {
         public const int full = 44032; //55203
@@ -27,9 +30,11 @@ namespace HangeulKeyBoard.MergeManager
         public const int middleLetter = 4449; //4469
         public const int lastLetter = 4520; //4546
     }
+    #endregion
 
     public class LetterMerge
     {
+        #region declaration
         private StringBuilder mainString = new StringBuilder();
         private char? subString;
         private IHangeulMerge mergeMethod;
@@ -49,7 +54,9 @@ namespace HangeulKeyBoard.MergeManager
                 }
             }
         }
-        //현재 입력받는 
+        #endregion
+
+        //현재 입력받은 문자를 보여줍니다.
         public string GetString()
         {
             if (subString == null)
@@ -63,6 +70,7 @@ namespace HangeulKeyBoard.MergeManager
                 return mainString.ToString() + subString.ToString();
             }
         }
+
         public string GetStringWithoutSubString()
         {
             return mainString.ToString();
@@ -83,6 +91,7 @@ namespace HangeulKeyBoard.MergeManager
                 isChanged = true;
             }
         }
+    
 
         public LetterMerge(IHangeulMerge _mergeMethod)
         {
@@ -91,4 +100,5 @@ namespace HangeulKeyBoard.MergeManager
             isChanged = false;
         }
     }
+
 }

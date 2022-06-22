@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HangeulKeyBoard.MergeManager;
 
 namespace HangeulKeyBoard
 {
@@ -10,12 +11,20 @@ namespace HangeulKeyBoard
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Convert.ToInt32('힣'));
-            Console.WriteLine(Convert.ToInt32('ㅎ'));
-            Console.WriteLine(Convert.ToInt32('ㅣ'));
-            Console.WriteLine(Convert.ToInt32('ᄒ'));
-            Console.WriteLine(Convert.ToInt32('ᅵ'));
-            Console.WriteLine(Convert.ToInt32('ᇂ'));
+
+            HangeulMergebyShiftKey keyboard = new HangeulMergebyShiftKey();
+            LetterMerge myLetterMerge = new LetterMerge(keyboard);
+
+            myLetterMerge.InputKey('ㅂ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅜ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅔ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㄹ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅎ');
+            Console.WriteLine(myLetterMerge.GetString());
         }
     }
 }

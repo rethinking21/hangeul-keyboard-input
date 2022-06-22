@@ -8,10 +8,13 @@ namespace HangeulKeyBoard.KeyLayout
 {
     public class qwerty
     {
+        #region string Index
+
         string hanguelIndex = "ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔㅁㄴㅇㄹㅎㅗㅓㅏㅣㅋㅌㅊㅍㅠㅜㅡ";
         string hanguelShiftIndex = "ㅃㅉㄸㄲㅆㅛㅕㅑㅒㅖㅁㄴㅇㄹㅎㅗㅓㅏㅣㅋㅌㅊㅍㅠㅜㅡ";
         string engIndex = "qwertyuiopasdfghjklzxcvbnm";
         string engShiftIndex = "QWERTYUIOPASDFGHJKLZXCVBNM";
+        #endregion
 
         //one key and dont use shift
         public char EngToHangeul(char _input)
