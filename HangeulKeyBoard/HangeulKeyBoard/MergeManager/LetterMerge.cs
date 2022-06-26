@@ -23,6 +23,7 @@ namespace HangeulKeyBoard.MergeManager
     #region BasicUnicode(int)
     public class BasicUnicode
     {
+        //https://ko.wikipedia.org/wiki/%EC%9C%A0%EB%8B%88%EC%BD%94%EB%93%9C_3000~3FFF
         public const int full = 44032; //55203
         public const int consonant = 12593; //12622
         public const int vowel = 12623; //12643

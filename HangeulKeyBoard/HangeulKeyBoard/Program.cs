@@ -15,7 +15,7 @@ namespace HangeulKeyBoard
             HangeulMergebyShiftKey keyboard = new HangeulMergebyShiftKey();
             LetterMerge myLetterMerge = new LetterMerge(keyboard);
 
-            myLetterMerge.InputKey('ㅂ');
+            myLetterMerge.InputKey('ㄱ');
             Console.WriteLine(myLetterMerge.GetString());
             myLetterMerge.InputKey('ㅜ');
             Console.WriteLine(myLetterMerge.GetString());

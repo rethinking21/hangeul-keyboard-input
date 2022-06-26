@@ -6,10 +6,19 @@ using System.Threading.Tasks;
 
 namespace HangeulKeyBoard.MergeManager
 {
-    public class HangeulMergebyShiftKey : IHangeulMerge
+    //천지인 키보드
+    //천지인 키보드는 여분의 char저장 공간이 더 있음!
+    public class HanguelMergebyCGI : IHangeulMerge
     {
-        //미완성
         #region declaration
+
+        private char? subString = null;
+        private List<int?> charList = new List<int?>();
+        private bool isPoped;
+        private bool isHanguel;
+
+        private char? extraString = null;
+
         public class MergeSetting
         {
             //아직 안만듬
@@ -18,36 +27,28 @@ namespace HangeulKeyBoard.MergeManager
 
         public MergeSetting setting;
 
-
-        
-        private char? subString = null;
-        private List<int?> charList = new List<int?>();
-        private bool isPoped;
-        private bool isHanguel;
-        private bool hasVowel;
-
         #endregion
 
         #region Hanguel Index
 
         //기본 초중종성 조합 (종성은 없는 경우도 있음을 주의할것 +1 해야함)
-        private readonly char[] firstIndex = { 
+        private readonly char[] firstIndex = {
             'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ',
-            'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 
-            'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 
+            'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
+            'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ',
             'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' };
         private readonly char[] middleIndex = {
-            'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 
+            'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ',
             'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
-            'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 
-            'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 
+            'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ',
+            'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ',
             'ㅣ'};
         private readonly char[] lastIndex = {
-            'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 
+            'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ',
             'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
             'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ',
-            'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 
-            'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 
+            'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ',
+            'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ',
             'ㅍ', 'ㅎ' };
 
         private readonly Dictionary<(int _base, int _add), int> middleAddDict = new Dictionary<(int _base, int _add), int>()
@@ -105,7 +106,7 @@ namespace HangeulKeyBoard.MergeManager
         //들어올 수 있는 모음 입력값
         private readonly char[] hangeulVowelInput = {
             'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ',
-            'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ', 
+            'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ',
             'ㅐ', 'ㅒ', 'ㅔ', 'ㅖ' };
 
         #endregion
@@ -124,7 +125,6 @@ namespace HangeulKeyBoard.MergeManager
             if (isPoped)
             {
                 subString = null;
-                hasVowel = false;
             }
             isPoped = true;
             charList.Clear();
@@ -141,7 +141,8 @@ namespace HangeulKeyBoard.MergeManager
             {
                 //입력창이 비어있는 경우 -> 합치기 가능!
                 return true;
-            }else if(BasicUnicode.consonant <= _intKey && _intKey <= BasicUnicode.vowel + 21)
+            }
+            else if (BasicUnicode.consonant <= _intKey && _intKey <= BasicUnicode.vowel + 21)
             {
                 //입력받은 문자가 한글문자 키보드에 존재하는 경우 (자음 모음별 분리)
                 if (_intKey >= BasicUnicode.vowel)
@@ -160,31 +161,6 @@ namespace HangeulKeyBoard.MergeManager
             {
                 //입력받은 문자가 한글문자 키보드에 존재하지 않은 경우
                 return false;
-            }
-        }
-        #endregion
-
-        #region InputKey
-        //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
-        public char? InputKey(char _key)
-        {
-            if (isPoped)
-            {
-                subString = null;
-                hasVowel = false;
-            }
-
-            if (canMerge(_key))
-            {
-                Merge(_key);
-                return null;
-            }
-            else
-            {
-                //모음이 들어올 때 앞의 자음을 남겨두는 방법을 고려해야 함
-                Clear(_key);
-                isPoped = true;
-                return subString;
             }
         }
         #endregion
@@ -208,7 +184,7 @@ namespace HangeulKeyBoard.MergeManager
             {
                 int?[] tempHangeul = new int?[3] { null, null, null };
 
-                foreach(int tempInt in charList)
+                foreach (int tempInt in charList)
                 {
                     //자음인지 모음인지 확인
                     if (tempInt >= BasicUnicode.vowel)
@@ -256,19 +232,21 @@ namespace HangeulKeyBoard.MergeManager
                         }
                     }
                 }
+
                 //합치기!
                 if (tempHangeul[0] == null)
                 {
                     subString = Convert.ToChar(tempHangeul[1]);
                     return;
-                }else if (tempHangeul[1] == null)
+                }
+                else if (tempHangeul[1] == null)
                 {
                     subString = Convert.ToChar(tempHangeul[0]);
                     return;
                 }
-                else if(tempHangeul[2] == null)
+                else if (tempHangeul[2] == null)
                 {
-                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 );
+                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28);
                     return;
                 }
                 else
@@ -281,56 +259,50 @@ namespace HangeulKeyBoard.MergeManager
 
         #endregion
 
+        #region InputKey
+        //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
+        public char? InputKey(char _key)
+        {
+            if (isPoped)
+            {
+                subString = null;
+            }
+
+            if (canMerge(_key))
+            {
+                Merge(_key);
+                return null;
+            }
+            else
+            {
+                //모음이 들어올 때 앞의 자음을 남겨두는 방법을 고려해야 함
+                Clear(_key);
+                isPoped = true;
+                return subString;
+            }
+        }
+        #endregion
+
         #region Clear
         //Clear
         public void Clear()
         {
             charList.Clear();
             subString = null;
-            hasVowel = false;
             isPoped = false;
             isHanguel = true;
         }
 
         private void Clear(char? _key)
         {
-            //갉ㅣ => 갈기 이렇게 되는 경우를 고려해야 함
-            if (hangeulConsonantInput.Contains((char)_key) || hangeulVowelInput.Contains((char)_key))
-            {
-                if (hangeulConsonantInput.Contains((char)charList.Last()) && hangeulVowelInput.Contains((char)_key))
-                {
-                    //두번 눌러서 쌍자음이 되는 경우도 고려해야함
-                    if (setting.mergeDoubleConsonant)
-                    {
-
-                    }
-                    else
-                    {
-                        int? tempChar = charList.Last();
-                        Merge(null);
-                        charList.Clear();
-                        charList.Add(Convert.ToInt32(tempChar));
-                        charList.Add(Convert.ToInt32(_key));
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                charList.Clear();
-                charList.Add(Convert.ToInt32(_key));
-                subString = _key;
-                return;
-            }
+            
         }
 
         #endregion
 
         #region main Func
-        public HangeulMergebyShiftKey()
+        public HanguelMergebyCGI()
         {
-            setting = new MergeSetting();
-            setting.mergeDoubleConsonant = false;
             isPoped = false;
         }
 

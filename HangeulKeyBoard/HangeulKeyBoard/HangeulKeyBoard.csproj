@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="KeyLayout\qwerty.cs" />
     <Compile Include="MergeManager\HangeulMergebyShiftKey.cs" />
+    <Compile Include="MergeManager\HanguelMergebyCGI.cs" />
     <Compile Include="MergeManager\LetterMerge.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
