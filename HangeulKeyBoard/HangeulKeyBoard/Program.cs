@@ -12,18 +12,14 @@ namespace HangeulKeyBoard
         static void Main(string[] args)
         {
 
-            HangeulMergebyShiftKey keyboard = new HangeulMergebyShiftKey();
+            HanguelMergebyCGI keyboard = new HanguelMergebyCGI();
             LetterMerge myLetterMerge = new LetterMerge(keyboard);
 
             myLetterMerge.InputKey('ㄱ');
             Console.WriteLine(myLetterMerge.GetString());
-            myLetterMerge.InputKey('ㅜ');
+            myLetterMerge.InputKey('ㄱ');
             Console.WriteLine(myLetterMerge.GetString());
-            myLetterMerge.InputKey('ㅔ');
-            Console.WriteLine(myLetterMerge.GetString());
-            myLetterMerge.InputKey('ㄹ');
-            Console.WriteLine(myLetterMerge.GetString());
-            myLetterMerge.InputKey('ㅎ');
+            myLetterMerge.InputKey('ㄱ');
             Console.WriteLine(myLetterMerge.GetString());
         }
     }

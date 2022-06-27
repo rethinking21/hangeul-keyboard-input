@@ -12,7 +12,8 @@ namespace HangeulKeyBoard.MergeManager
     {
         #region declaration
 
-        private char? subString = null;
+        private string subString = null;
+        private string outString = null;
         private List<int?> charList = new List<int?>();
         private bool isPoped;
         private bool isHanguel;
@@ -40,7 +41,7 @@ namespace HangeulKeyBoard.MergeManager
             'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
             'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ',
             'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ',
-            'ㅣ'};
+            'ㅣ', 'ㆍ', 'ᆢ'}; // 아래아 주의!
         private readonly char[] lastIndex = {
             'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ',
             'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
@@ -49,9 +50,75 @@ namespace HangeulKeyBoard.MergeManager
             'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ',
             'ㅍ', 'ㅎ' };
 
-        private readonly Dictionary<(char? _origin, char? _input), char?> middleAddDict = new Dictionary<(char? _origin, char? _input), char?>()
+        private readonly Dictionary<(char? _origin, char? _input), char?> CGIMiddleAddDict = new Dictionary<(char? _origin, char? _input), char?>()
         {
+            // 'ㅣ' 추가
+            {('ㅡ', 'ㅣ'), 'ㅢ'},
+            {('ㆍ', 'ㅣ'), 'ㅓ'},
+            {('ᆢ', 'ㅣ'), 'ㅕ'},
+            {('ㅏ', 'ㅣ'), 'ㅐ'},
+            {('ㅑ', 'ㅣ'), 'ㅒ'},
+            {('ㅓ', 'ㅣ'), 'ㅔ'},
+            {('ㅕ', 'ㅣ'), 'ㅖ'},
+            {('ㅜ', 'ㅣ'), 'ㅟ'},
+            {('ㅗ', 'ㅣ'), 'ㅚ'},
+            {('ㅘ', 'ㅣ'), 'ㅙ'},
+            {('ㅝ', 'ㅣ'), 'ㅞ'},
+            {('ㅠ', 'ㅣ'), 'ㅝ'},
 
+            //'ㅡ' 추가
+            {('ㆍ', 'ㅡ'), 'ㅗ'},
+            {('ᆢ', 'ㅡ'), 'ㅛ'},
+
+            //'ㆍ' 추가
+            {('ㆍ', 'ㆍ'), 'ᆢ'},
+            {('ᆢ', 'ㆍ'), 'ㆍ'},
+            {('ㅡ', 'ㆍ'), 'ㅜ'},
+            {('ㅜ', 'ㆍ'), 'ㅠ'},
+            {('ㅠ', 'ㆍ'), 'ㅜ'},
+            {('ㅣ', 'ㆍ'), 'ㅏ'},
+            {('ㅏ', 'ㆍ'), 'ㅑ'},
+            {('ㅑ', 'ㆍ'), 'ㅏ'},
+            {('ㅚ', 'ㆍ'), 'ㅘ'},
+            {('ㅘ', 'ㆍ'), 'ㅚ'},
+        };
+
+        private readonly Dictionary<(char? _origin, char? _input), char?> CGIFirstAddDict = new Dictionary<(char? _origin, char? _input), char?>()
+        {
+            //ㄱ
+            {('ㄱ', 'ㄱ'), 'ㅋ'},
+            {('ㅋ', 'ㄱ'), 'ㄲ'},
+            {('ㄲ', 'ㄱ'), 'ㄱ'},
+            //ㄴ
+            {('ㄴ', 'ㄴ'), 'ㄹ'},
+            {('ㄹ', 'ㄴ'), 'ㄴ'},
+            //ㄷ
+            {('ㄷ', 'ㄷ'), 'ㅌ'},
+            {('ㅌ', 'ㄷ'), 'ㄸ'},
+            {('ㄸ', 'ㄷ'), 'ㄷ'},
+            //ㅂ
+            {('ㅂ', 'ㅂ'), 'ㅍ'},
+            {('ㅍ', 'ㅂ'), 'ㅃ'},
+            {('ㅃ', 'ㅂ'), 'ㅂ'},
+            //ㅅ
+            {('ㅅ', 'ㅅ'), 'ㅎ'},
+            {('ㅎ', 'ㅅ'), 'ㅆ'},
+            {('ㅆ', 'ㅅ'), 'ㅅ'},
+            //ㅈ
+            {('ㅈ', 'ㅈ'), 'ㅊ'},
+            {('ㅊ', 'ㅈ'), 'ㅉ'},
+            {('ㅉ', 'ㅈ'), 'ㅈ'},
+            //ㅇ
+            {('ㅇ', 'ㅇ'), 'ㅁ'},
+            {('ㅁ', 'ㅇ'), 'ㅇ'},
+        };
+
+        private readonly Dictionary<(char? _origin, char? _input), char?> CGISpecialAddDict = new Dictionary<(char? _origin, char? _input), char?>()
+        {
+            {('.', '.'), ','},
+            {(',', '.'), '?'},
+            {('?', '.'), '!'},
+            {('!', '.'), '.'},
         };
 
         private readonly Dictionary<(int _base, int _add), int> middleAddDict = new Dictionary<(int _base, int _add), int>()
@@ -115,7 +182,7 @@ namespace HangeulKeyBoard.MergeManager
         #endregion
 
         #region Show Merge
-        public char? ShowMerge()
+        public string ShowMerge()
         {
             return subString;
         }
@@ -123,7 +190,7 @@ namespace HangeulKeyBoard.MergeManager
 
         #region MergeAndPop
         //문자를 합친 다음 내보냅니다.
-        public char? MergeAndPop()
+        public string MergeAndPop()
         {
             if (isPoped)
             {
@@ -162,6 +229,12 @@ namespace HangeulKeyBoard.MergeManager
             }
             else
             {
+                //.,?! 문자 입력시
+                if (".,?!".Contains(_key))
+                {
+                    return true;
+                }
+
                 //입력받은 문자가 한글문자 키보드에 존재하지 않은 경우
                 return false;
             }
@@ -180,12 +253,47 @@ namespace HangeulKeyBoard.MergeManager
             if (charList.Count == 1)
             {
                 //한글자일 경우 바로 변환
-                subString = Convert.ToChar(charList[0]);
+                subString = Convert.ToChar(charList[0]).ToString();
                 return;
             }
             else
             {
-                
+                //우선 키패드 합치는 과정
+
+                //특수기호 .,?!
+                if (".,?!".Contains(Convert.ToChar(charList[0])) && _key == '.' )
+                {
+                    charList[0] = (int)CGISpecialAddDict[(Convert.ToChar(charList[0]), '.')];
+                    charList.RemoveAt(charList.Count - 1);
+                    subString = Convert.ToChar(charList[0]).ToString();
+                    return;
+                }
+                else if (CGIFirstAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
+                {
+                    //자음 합치기
+                    charList[charList.Count - 2] = (int)CGIFirstAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
+                    charList.RemoveAt(charList.Count - 1);
+                }
+                else if (CGIMiddleAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
+                {
+                    //모음 합치기
+                    charList[charList.Count - 2] = CGIMiddleAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
+                    charList.RemoveAt(charList.Count - 1);
+                }
+
+                subString = "";
+                outString = "";
+                for (int listIndex = 0; listIndex < charList.Count; listIndex++)
+                {
+
+                }
+
+                // 임시
+                subString = Convert.ToChar(charList[0]).ToString();
+                return;
+
+                //스페이스 키일 경우 분리 시키기
+                //마지막 리스트와 
             }
         }
 
@@ -193,7 +301,7 @@ namespace HangeulKeyBoard.MergeManager
 
         #region InputKey
         //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
-        public char? InputKey(char _key)
+        public string InputKey(char _key)
         {
             if (isPoped)
             {
@@ -203,6 +311,7 @@ namespace HangeulKeyBoard.MergeManager
             if (canMerge(_key))
             {
                 Merge(_key);
+                //합치면서 내놓는 값이 있을 수 있음!
                 return null;
             }
             else

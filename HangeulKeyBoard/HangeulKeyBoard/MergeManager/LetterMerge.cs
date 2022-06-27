@@ -12,11 +12,11 @@ namespace HangeulKeyBoard.MergeManager
         //clear
         void Clear();
         //현재 쌓인 음소들을 합쳐서 내보냅니다.
-        char? MergeAndPop();
+        string MergeAndPop();
         //현재까지 쌓인 음소들을 합친걸 보여줍니다.
-        char? ShowMerge();
+        string ShowMerge();
         //키를 입력받으면서 조건이 되면 뱉어냅니다.
-        char? InputKey(char _key);
+        string InputKey(char _key);
     }
     #endregion
 
@@ -37,17 +37,17 @@ namespace HangeulKeyBoard.MergeManager
     {
         #region declaration
         private StringBuilder mainString = new StringBuilder();
-        private char? subString;
+        private string subString;
         private IHangeulMerge mergeMethod;
         public bool isChanged;
 
-        public char? SubString
+        public string SubString
         {
             get
             {
                 if (subString == null)
                 {
-                    return ' ';
+                    return " ";
                 }
                 else
                 {
@@ -79,7 +79,7 @@ namespace HangeulKeyBoard.MergeManager
 
         public void InputKey(char _key)
         {
-            char? _checkString = mergeMethod.InputKey(_key);
+            string _checkString = mergeMethod.InputKey(_key);
             if (_checkString != null)
             {
                 subString = null;

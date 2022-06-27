@@ -20,7 +20,7 @@ namespace HangeulKeyBoard.MergeManager
 
 
         
-        private char? subString = null;
+        private string subString = null;
         private List<int?> charList = new List<int?>();
         private bool isPoped;
         private bool isHanguel;
@@ -111,7 +111,7 @@ namespace HangeulKeyBoard.MergeManager
         #endregion
 
         #region Show Merge
-        public char? ShowMerge()
+        public string ShowMerge()
         {
             return subString;
         }
@@ -119,7 +119,7 @@ namespace HangeulKeyBoard.MergeManager
 
         #region MergeAndPop
         //문자를 합친 다음 내보냅니다.
-        public char? MergeAndPop()
+        public string MergeAndPop()
         {
             if (isPoped)
             {
@@ -166,7 +166,7 @@ namespace HangeulKeyBoard.MergeManager
 
         #region InputKey
         //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
-        public char? InputKey(char _key)
+        public string InputKey(char _key)
         {
             if (isPoped)
             {
@@ -201,7 +201,7 @@ namespace HangeulKeyBoard.MergeManager
             if (charList.Count == 1)
             {
                 //한글자일 경우 바로 변환
-                subString = Convert.ToChar(charList[0]);
+                subString = Convert.ToChar(charList[0]).ToString();
                 return;
             }
             else
@@ -259,21 +259,21 @@ namespace HangeulKeyBoard.MergeManager
                 //합치기!
                 if (tempHangeul[0] == null)
                 {
-                    subString = Convert.ToChar(tempHangeul[1]);
+                    subString = Convert.ToChar(tempHangeul[1]).ToString();
                     return;
                 }else if (tempHangeul[1] == null)
                 {
-                    subString = Convert.ToChar(tempHangeul[0]);
+                    subString = Convert.ToChar(tempHangeul[0]).ToString();
                     return;
                 }
                 else if(tempHangeul[2] == null)
                 {
-                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 );
+                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 ).ToString();
                     return;
                 }
                 else
                 {
-                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 + tempHangeul[2] - BasicUnicode.lastLetter + 1);
+                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 + tempHangeul[2] - BasicUnicode.lastLetter + 1).ToString();
                     return;
                 }
             }
@@ -319,7 +319,7 @@ namespace HangeulKeyBoard.MergeManager
             {
                 charList.Clear();
                 charList.Add(Convert.ToInt32(_key));
-                subString = _key;
+                subString = _key.ToString();
                 return;
             }
         }
