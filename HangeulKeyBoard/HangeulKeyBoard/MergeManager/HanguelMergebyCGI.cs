@@ -21,8 +21,6 @@ namespace HangeulKeyBoard.MergeManager
 
         public class MergeSetting
         {
-            //아직 안만듬
-            public bool mergeDoubleConsonant = false;
         }
 
         public MergeSetting setting;
@@ -50,6 +48,11 @@ namespace HangeulKeyBoard.MergeManager
             'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ',
             'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ',
             'ㅍ', 'ㅎ' };
+
+        private readonly Dictionary<(char? _origin, char? _input), char?> middleAddDict = new Dictionary<(char? _origin, char? _input), char?>()
+        {
+
+        };
 
         private readonly Dictionary<(int _base, int _add), int> middleAddDict = new Dictionary<(int _base, int _add), int>()
         {
@@ -182,78 +185,7 @@ namespace HangeulKeyBoard.MergeManager
             }
             else
             {
-                int?[] tempHangeul = new int?[3] { null, null, null };
-
-                foreach (int tempInt in charList)
-                {
-                    //자음인지 모음인지 확인
-                    if (tempInt >= BasicUnicode.vowel)
-                    {
-                        if (tempHangeul[1] == null)
-                        {
-                            //첫 모음 저장
-                            tempHangeul[1] = tempInt - BasicUnicode.vowel + BasicUnicode.middleLetter;
-                        }
-                        else
-                        {
-                            //겹치는 모음 확인
-                            tempHangeul[1] = middleAddDict[((int)tempHangeul[1] - BasicUnicode.middleLetter, tempInt - BasicUnicode.vowel)]
-                                + BasicUnicode.middleLetter;
-                        }
-                    }
-                    else
-                    {
-                        if (tempHangeul[1] == null)
-                        {
-                            //초성
-                            if (setting.mergeDoubleConsonant)
-                            {
-                                //쌍자음 관련
-                            }
-                            else
-                            {
-                                tempHangeul[0] = consonantToFirstDict[tempInt - BasicUnicode.consonant] + BasicUnicode.firstLetter;
-                            }
-                        }
-                        else
-                        {
-                            //종성
-                            if (tempHangeul[2] == null)
-                            {
-                                //더 좋은 방법?
-                                tempHangeul[2] = Array.IndexOf(lastIndex, Convert.ToChar(tempInt)) + BasicUnicode.lastLetter;
-                            }
-                            else
-                            {
-                                tempHangeul[2] = lastAddDict[((int)tempHangeul[2] - BasicUnicode.lastLetter, consonantToLastDict[tempInt - BasicUnicode.consonant])]
-                                    + BasicUnicode.lastLetter;
-                            }
-
-                        }
-                    }
-                }
-
-                //합치기!
-                if (tempHangeul[0] == null)
-                {
-                    subString = Convert.ToChar(tempHangeul[1]);
-                    return;
-                }
-                else if (tempHangeul[1] == null)
-                {
-                    subString = Convert.ToChar(tempHangeul[0]);
-                    return;
-                }
-                else if (tempHangeul[2] == null)
-                {
-                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28);
-                    return;
-                }
-                else
-                {
-                    subString = Convert.ToChar(BasicUnicode.full + ((tempHangeul[0] - BasicUnicode.firstLetter) * 21 + tempHangeul[1] - BasicUnicode.middleLetter) * 28 + tempHangeul[2] - BasicUnicode.lastLetter + 1);
-                    return;
-                }
+                
             }
         }
 
