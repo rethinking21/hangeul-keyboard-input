@@ -281,11 +281,90 @@ namespace HangeulKeyBoard.MergeManager
                     charList.RemoveAt(charList.Count - 1);
                 }
 
+                //하나씩 체크하면서 돌아가기
                 subString = "";
-                outString = "";
+                outString = ""; //출력전에 미리 나오는 것
+                int?[] tempHangeul = new int?[3] { null, null, null };
+                bool hasVowel = false;
+                bool hasCons = false;
+                bool hasOut = false;
+
                 for (int listIndex = 0; listIndex < charList.Count; listIndex++)
                 {
+                    char _char = Convert.ToChar(charList[listIndex]);
 
+                    if (hangeulConsonantInput.Contains(_char))
+                    {
+                        //자음일 경우
+                        if(listIndex == 0)
+                        {
+                            //처음 자음이 나온 경우
+                            tempHangeul[0] = charList[0];
+                            hasCons = true;
+                        }
+                        else if (hasVowel)
+                        {
+                            //모음이 이미 있을 경우
+                            if (hasOut)
+                            {
+                                //ex) 골ㅆ
+                                tempHangeul[0] = charList[listIndex];
+                            }
+                            else
+                            {
+                                if(tempHangeul[2] == null)
+                                {
+                                    tempHangeul[2] = consonantToLastDict[(int)charList[listIndex] - BasicUnicode.consonant] + BasicUnicode.lastLetter;
+                                }
+                                else
+                                {
+                                    //종성을 합칠 수 있는지 보기
+                                    if (lastAddDict.ContainsKey(((int)tempHangeul[2], (int)charList[listIndex] - BasicUnicode.consonant)))
+                                    {
+                                        tempHangeul[2] = lastAddDict[((int)tempHangeul[2], (int)charList[listIndex] - BasicUnicode.consonant)] + BasicUnicode.lastLetter;
+                                    }
+                                    else
+                                    {
+                                        hasOut = true;
+                                        outString += MergeOneChar(Convert.ToChar(tempHangeul[0]), Convert.ToChar(tempHangeul[1]), Convert.ToChar(tempHangeul[2])).ToString();
+                                        tempHangeul[0] = charList[listIndex];
+                                        tempHangeul[1] = null;
+                                        tempHangeul[2] = null;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //모음이 없을 경우
+                            if (hasOut)
+                            {
+                                //이미 ( ex)곬ㆍ )
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                    else if (hangeulVowelInput.Contains(_char))
+                    {
+                        //모음일 경우
+                        if(listIndex == 0)
+                        {
+                            //처음 모음이 나온 경우
+                            tempHangeul[1] = charList[0];
+                            hasVowel = true;
+                        }
+                        else if (hasCons)
+                        {
+
+                        }
+                    }
+                    else
+                    {
+                        //특문?
+                    }
                 }
 
                 // 임시
@@ -294,6 +373,30 @@ namespace HangeulKeyBoard.MergeManager
 
                 //스페이스 키일 경우 분리 시키기
                 //마지막 리스트와 
+            }
+        }
+
+        private char MergeOneChar(char? _first, char? _middle, char? _last)
+        {
+            //초성, 중성, 종성의 유니코드 값이 아닐경우, 여기서 변경하기
+
+            //한글 합치기!(한글 이외의 것은 오류가 날 수 있음)
+            //주의 : 초성, 중성, 종성의 유니코드 값은 그 집단에 속한 유니코드 값이어야 함
+            if (_first == null)
+            {
+                return (char)_middle;
+            }
+            else if (_middle == null)
+            {
+                return (char)_first;
+            }
+            else if (_last == null)
+            {
+                return Convert.ToChar(BasicUnicode.full + (((int)_first - BasicUnicode.firstLetter) * 21 + (int)_middle - BasicUnicode.middleLetter) * 28);
+            }
+            else
+            {
+                return Convert.ToChar(BasicUnicode.full + (((int)_first - BasicUnicode.firstLetter) * 21 + (int)_middle - BasicUnicode.middleLetter) * 28 + (int)_last - BasicUnicode.lastLetter + 1);
             }
         }
 
