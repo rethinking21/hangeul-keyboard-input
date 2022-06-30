@@ -258,8 +258,8 @@ namespace HangeulKeyBoard.MergeManager
             }
             else
             {
+                #region CGI change Button
                 //우선 키패드 합치는 과정
-
                 //특수기호 .,?!
                 if (".,?!".Contains(Convert.ToChar(charList[0])) && _key == '.' )
                 {
@@ -280,7 +280,9 @@ namespace HangeulKeyBoard.MergeManager
                     charList[charList.Count - 2] = CGIMiddleAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
                     charList.RemoveAt(charList.Count - 1);
                 }
+                #endregion
 
+                #region merge char to string
                 //하나씩 체크하면서 돌아가기
                 subString = "";
                 outString = ""; //출력전에 미리 나오는 것
@@ -304,7 +306,7 @@ namespace HangeulKeyBoard.MergeManager
                         }
                         else if (hasVowel)
                         {
-                            //모음이 이미 있을 경우
+                            //모음이 이미 있을 경우 (종성)
                             if (hasOut)
                             {
                                 //ex) 골ㅆ
@@ -312,6 +314,7 @@ namespace HangeulKeyBoard.MergeManager
                             }
                             else
                             {
+                                //나온게 없을 경우
                                 if(tempHangeul[2] == null)
                                 {
                                     tempHangeul[2] = consonantToLastDict[(int)charList[listIndex] - BasicUnicode.consonant] + BasicUnicode.lastLetter;
@@ -325,21 +328,23 @@ namespace HangeulKeyBoard.MergeManager
                                     }
                                     else
                                     {
+                                        //합칠 수 없을 때 초성 으로 빼내기
                                         hasOut = true;
                                         outString += MergeOneChar(Convert.ToChar(tempHangeul[0]), Convert.ToChar(tempHangeul[1]), Convert.ToChar(tempHangeul[2])).ToString();
                                         tempHangeul[0] = charList[listIndex];
                                         tempHangeul[1] = null;
                                         tempHangeul[2] = null;
+                                        hasVowel = false;
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            //모음이 없을 경우
+                            //모음이 없을 경우 (초성)
                             if (hasOut)
                             {
-                                //이미 ( ex)곬ㆍ )
+                                //해당 사항 없을듯
                             }
                             else
                             {
@@ -358,14 +363,20 @@ namespace HangeulKeyBoard.MergeManager
                         }
                         else if (hasCons)
                         {
-
+                            //자음이 나온 경우
+                        }
+                        else
+                        {
+                            //문자가 미리 나온 경우 ex)곬ㅗ -> 골소
                         }
                     }
                     else
                     {
                         //특문?
+                        subString = _char.ToString();
                     }
                 }
+                #endregion
 
                 // 임시
                 subString = Convert.ToChar(charList[0]).ToString();
@@ -379,7 +390,7 @@ namespace HangeulKeyBoard.MergeManager
         private char MergeOneChar(char? _first, char? _middle, char? _last)
         {
             //초성, 중성, 종성의 유니코드 값이 아닐경우, 여기서 변경하기
-
+            
             //한글 합치기!(한글 이외의 것은 오류가 날 수 있음)
             //주의 : 초성, 중성, 종성의 유니코드 값은 그 집단에 속한 유니코드 값이어야 함
             if (_first == null)
