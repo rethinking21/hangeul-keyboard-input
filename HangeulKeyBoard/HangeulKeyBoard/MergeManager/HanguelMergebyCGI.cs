@@ -18,6 +18,8 @@ namespace HangeulKeyBoard.MergeManager
         private bool isPoped;
         private bool isHanguel;
 
+        private List<int> SplitCharacterIndex = new List<int>();
+
         private char? extraString = null;
 
         public class MergeSetting
@@ -258,29 +260,10 @@ namespace HangeulKeyBoard.MergeManager
             }
             else
             {
-                #region CGI change Button
                 //우선 키패드 합치는 과정
-                //특수기호 .,?!
-                if (".,?!".Contains(Convert.ToChar(charList[0])) && _key == '.' )
-                {
-                    charList[0] = (int)CGISpecialAddDict[(Convert.ToChar(charList[0]), '.')];
-                    charList.RemoveAt(charList.Count - 1);
-                    subString = Convert.ToChar(charList[0]).ToString();
-                    return;
-                }
-                else if (CGIFirstAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
-                {
-                    //자음 합치기
-                    charList[charList.Count - 2] = (int)CGIFirstAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
-                    charList.RemoveAt(charList.Count - 1);
-                }
-                else if (CGIMiddleAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
-                {
-                    //모음 합치기
-                    charList[charList.Count - 2] = CGIMiddleAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
-                    charList.RemoveAt(charList.Count - 1);
-                }
-                #endregion
+                CheckChangeCGISpecialKey();
+                CheckChangeCGIVowelKey();
+                CheckChangeCGIConsonantKey();
 
                 #region merge char to string
                 //하나씩 체크하면서 돌아가기
@@ -290,6 +273,9 @@ namespace HangeulKeyBoard.MergeManager
                 bool hasVowel = false;
                 bool hasCons = false;
                 bool hasOut = false;
+
+                //글자 조합별로 체크로 분리시키기
+                SpiltListByCharacter();
 
                 for (int listIndex = 0; listIndex < charList.Count; listIndex++)
                 {
@@ -364,6 +350,17 @@ namespace HangeulKeyBoard.MergeManager
                         else if (hasCons)
                         {
                             //자음이 나온 경우
+                            if (hasVowel)
+                            {
+                                //모음도 나온 경우
+                                tempHangeul[1] = middleAddDict[((int)tempHangeul[1], (int)charList[listIndex])];
+                            }
+                            else
+                            {
+                                //모음이 처음인 경우
+                                tempHangeul[1] = charList[listIndex];
+                                hasVowel = true;
+                            }
                         }
                         else
                         {
@@ -410,6 +407,39 @@ namespace HangeulKeyBoard.MergeManager
                 return Convert.ToChar(BasicUnicode.full + (((int)_first - BasicUnicode.firstLetter) * 21 + (int)_middle - BasicUnicode.middleLetter) * 28 + (int)_last - BasicUnicode.lastLetter + 1);
             }
         }
+
+        #region check CGI key func
+        private void CheckChangeCGISpecialKey()
+        {
+            if (".,?!".Contains(Convert.ToChar(charList[0])) && _key == '.')
+            {
+                charList[0] = (int)CGISpecialAddDict[(Convert.ToChar(charList[0]), '.')];
+                charList.RemoveAt(charList.Count - 1);
+                subString = Convert.ToChar(charList[0]).ToString();
+                return;
+            }
+        }
+
+        private void CheckChangeCGIVowelKey()
+        {
+            if (CGIMiddleAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
+            {
+                //모음 합치기
+                charList[charList.Count - 2] = CGIMiddleAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
+                charList.RemoveAt(charList.Count - 1);
+            }
+        }
+
+        private void CheckChangeCGIConsonantKey()
+        {
+            if (CGIFirstAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
+            {
+                //자음 합치기
+                charList[charList.Count - 2] = (int)CGIFirstAddDict[(Convert.ToChar(charList[charList.Count - 2]), _key)];
+                charList.RemoveAt(charList.Count - 1);
+            }
+        }
+        #endregion
 
         #endregion
 
@@ -462,5 +492,45 @@ namespace HangeulKeyBoard.MergeManager
         }
 
         #endregion
+
+        public void SpiltListByCharacter()
+        {
+            SplitCharacterIndex.Clear();
+            SplitCharacterIndex.Add(0);
+
+            bool isPreviousConsonant = false;
+            bool isPreviousVowel = false;
+            bool hasVowel = false;
+            bool hasConsonant = false;
+            int firstIndex = 0;
+
+            for (int index = 0; index < charList.Count; index++)
+            {
+                if (hangeulVowelInput.Contains(Convert.ToChar(charList)))
+                {
+                    if (isPreviousConsonant)
+                    {
+                        isPreviousConsonant = false;
+
+                    }
+                }else if (hangeulConsonantInput.Contains(Convert.ToChar(charList)))
+                {
+
+                }
+                else
+                {
+                    //조합이 안되는 경우
+                    SplitCharacterIndex.Add(index);
+                }
+            }
+
+
+            SplitCharacterIndex.Add(charList.Count);
+        }
+
+        public char MergeCharBySplitIndex(int _firstIndex, int _lastIndex)
+        {
+            return '0';
+        }
     }
 }
