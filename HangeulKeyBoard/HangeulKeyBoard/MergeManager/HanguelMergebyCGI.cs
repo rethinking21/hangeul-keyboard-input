@@ -140,17 +140,17 @@ namespace HangeulKeyBoard.MergeManager
 
         private readonly Dictionary<(int _base, int _add), int> lastAddDict = new Dictionary<(int _base, int _add), int>()
         {
-            {(0, 18), 2}, //ㄳ
-            {(3, 21), 4}, //ㄵ
-            {(3, 26), 5}, //ㄶ
-            {(7, 0), 8}, //ㄺ
-            {(7, 15), 9}, //ㄻ
-            {(7, 16), 10}, //ㄼ
-            {(7, 18), 11}, //ㄽ
-            {(7, 24), 12}, //ㄾ
-            {(7, 25), 13}, //ㄿ
-            {(7, 26), 14}, //ㅀ
-            {(16, 18), 17}, //ㅄ
+            {('ㄱ' - BasicUnicode.consonant, 'ㅅ' - BasicUnicode.consonant), 'ㄳ' - BasicUnicode.consonant}, //ㄳ
+            {('ㄴ' - BasicUnicode.consonant, 'ㅈ' - BasicUnicode.consonant), 'ㄵ' - BasicUnicode.consonant}, //ㄵ
+            {('ㄴ' - BasicUnicode.consonant, 'ㅎ' - BasicUnicode.consonant), 'ㄶ' - BasicUnicode.consonant}, //ㄶ
+            {('ㄹ' - BasicUnicode.consonant, 'ㄱ' - BasicUnicode.consonant), 'ㄺ' - BasicUnicode.consonant}, //ㄺ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅁ' - BasicUnicode.consonant), 'ㄻ' - BasicUnicode.consonant}, //ㄻ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅂ' - BasicUnicode.consonant), 'ㄼ' - BasicUnicode.consonant}, //ㄼ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅅ' - BasicUnicode.consonant), 'ㄽ' - BasicUnicode.consonant}, //ㄽ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅌ' - BasicUnicode.consonant), 'ㄾ' - BasicUnicode.consonant}, //ㄾ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅍ' - BasicUnicode.consonant), 'ㄿ' - BasicUnicode.consonant}, //ㄿ
+            {('ㄹ' - BasicUnicode.consonant, 'ㅎ' - BasicUnicode.consonant), 'ㅀ' - BasicUnicode.consonant}, //ㅀ
+            {('ㅂ' - BasicUnicode.consonant, 'ㅅ' - BasicUnicode.consonant), 'ㅄ' - BasicUnicode.consonant}, //ㅄ
         };
 
         //유니코드 배열 자음 -> 초성
@@ -249,7 +249,7 @@ namespace HangeulKeyBoard.MergeManager
                 for (int splitIndex = 0; splitIndex < SplitCharacterIndex.Count - 1; splitIndex++)
                 {
                     Console.WriteLine(Convert.ToString(splitIndex) + "  " + Convert.ToString(SplitCharacterIndex[splitIndex]));
-                    if (SplitCharacterIndex[splitIndex] != SplitCharacterIndex[splitIndex + 1])
+                    if (SplitCharacterIndex[splitIndex] < SplitCharacterIndex[splitIndex + 1])
                     {
                         subString += MergeCharBySplitIndex(SplitCharacterIndex[splitIndex], SplitCharacterIndex[splitIndex + 1]);
                     }
@@ -329,12 +329,12 @@ namespace HangeulKeyBoard.MergeManager
             for (int index = 0; index < charList.Count; index++)
             {
                 //모음
-                if (hangeulVowelInput.Contains(Convert.ToChar(charList[index])))
+                if (middleIndex.Contains(Convert.ToChar(charList[index])) && !(charList[index] == 'ㆍ' && charList[index] == 'ᆢ'))
                 {
                     SplitCheckMergePossibleVowel(index);
                 }
                 //자음
-                else if (hangeulConsonantInput.Contains(Convert.ToChar(charList[index])))
+                else if (firstIndex.Contains(Convert.ToChar(charList[index])))
                 {
                     SplitCheckMergePossibleConsonant(index);
                 }
@@ -386,6 +386,8 @@ namespace HangeulKeyBoard.MergeManager
             {
                 if (splitHasVowel)
                 {
+                    Console.WriteLine((int)charList[_index - 1] - BasicUnicode.consonant);
+                    Console.WriteLine((int)charList[_index] - BasicUnicode.consonant );
                     //종성 위치
                     if (splitHasTwoLastVowel)
                     {
