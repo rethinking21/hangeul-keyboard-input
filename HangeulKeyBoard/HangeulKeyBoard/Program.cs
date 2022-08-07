@@ -21,7 +21,17 @@ namespace HangeulKeyBoard
             Console.WriteLine(myLetterMerge.GetString());
             myLetterMerge.InputKey('ㄱ');
             Console.WriteLine(myLetterMerge.GetString());
-            myLetterMerge.InputKey('ㅏ');
+            myLetterMerge.InputKey('ㆍ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㆍ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅣ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㄴ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅂ');
+            Console.WriteLine(myLetterMerge.GetString());
+            myLetterMerge.InputKey('ㅜ');
             Console.WriteLine(myLetterMerge.GetString());
         }
     }

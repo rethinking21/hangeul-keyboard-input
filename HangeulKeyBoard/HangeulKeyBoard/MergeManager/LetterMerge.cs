@@ -83,7 +83,9 @@ namespace HangeulKeyBoard.MergeManager
             if (_checkString != null)
             {
                 subString = null;
+                mainString.Clear();
                 mainString.Append(_checkString);
+                //mainString.Append(_checkString);
                 isChanged = true;
             }
             else

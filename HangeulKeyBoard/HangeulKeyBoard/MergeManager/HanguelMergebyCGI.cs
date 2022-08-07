@@ -13,14 +13,18 @@ namespace HangeulKeyBoard.MergeManager
         #region declaration
 
         private string subString = null;
-        private string outString = null;
+        
         private List<int?> charList = new List<int?>();
         private bool isPoped;
-        private bool isHanguel;
+
+        bool splitIsPreviousConsonant = false;
+        bool splitIsPreviousVowel = false;
+        bool splitHasConsonant = false;
+        bool splitHasVowel = false;
+        bool splitHasTwoLastVowel = false;
+        int splitFirstIndex = 0;
 
         private List<int> SplitCharacterIndex = new List<int>();
-
-        private char? extraString = null;
 
         public class MergeSetting
         {
@@ -204,42 +208,16 @@ namespace HangeulKeyBoard.MergeManager
         }
         #endregion
 
-        #region canMerge
-        //문자를 합칠 수 있는지 확인합니다.
-        private bool canMerge(char _key)
+        #region InputKey
+        //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
+        public string InputKey(char _key)
         {
-            int _intKey = Convert.ToInt32(_key);
-            if (subString == null)
+            if (isPoped)
             {
-                //입력창이 비어있는 경우 -> 합치기 가능!
-                return true;
+                subString = null;
             }
-            else if (BasicUnicode.consonant <= _intKey && _intKey <= BasicUnicode.vowel + 21)
-            {
-                //입력받은 문자가 한글문자 키보드에 존재하는 경우 (자음 모음별 분리)
-                if (_intKey >= BasicUnicode.vowel)
-                {
-                    //모음
-
-                    return true;
-
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                //.,?! 문자 입력시
-                if (".,?!".Contains(_key))
-                {
-                    return true;
-                }
-
-                //입력받은 문자가 한글문자 키보드에 존재하지 않은 경우
-                return false;
-            }
+            Merge(_key);
+            return subString; //예시, 나중에 고칠것
         }
         #endregion
 
@@ -261,155 +239,28 @@ namespace HangeulKeyBoard.MergeManager
             else
             {
                 //우선 키패드 합치는 과정
-                CheckChangeCGISpecialKey();
-                CheckChangeCGIVowelKey();
-                CheckChangeCGIConsonantKey();
+                CheckChangeCGISpecialKey(_key);
+                CheckChangeCGIVowelKey(_key);
+                CheckChangeCGIConsonantKey(_key);
 
-                #region merge char to string
-                //하나씩 체크하면서 돌아가기
-                subString = "";
-                outString = ""; //출력전에 미리 나오는 것
-                int?[] tempHangeul = new int?[3] { null, null, null };
-                bool hasVowel = false;
-                bool hasCons = false;
-                bool hasOut = false;
-
-                //글자 조합별로 체크로 분리시키기
                 SpiltListByCharacter();
 
-                for (int listIndex = 0; listIndex < charList.Count; listIndex++)
+                subString = "";
+                for (int splitIndex = 0; splitIndex < SplitCharacterIndex.Count - 1; splitIndex++)
                 {
-                    char _char = Convert.ToChar(charList[listIndex]);
-
-                    if (hangeulConsonantInput.Contains(_char))
+                    Console.WriteLine(Convert.ToString(splitIndex) + "  " + Convert.ToString(SplitCharacterIndex[splitIndex]));
+                    if (SplitCharacterIndex[splitIndex] != SplitCharacterIndex[splitIndex + 1])
                     {
-                        //자음일 경우
-                        if(listIndex == 0)
-                        {
-                            //처음 자음이 나온 경우
-                            tempHangeul[0] = charList[0];
-                            hasCons = true;
-                        }
-                        else if (hasVowel)
-                        {
-                            //모음이 이미 있을 경우 (종성)
-                            if (hasOut)
-                            {
-                                //ex) 골ㅆ
-                                tempHangeul[0] = charList[listIndex];
-                            }
-                            else
-                            {
-                                //나온게 없을 경우
-                                if(tempHangeul[2] == null)
-                                {
-                                    tempHangeul[2] = consonantToLastDict[(int)charList[listIndex] - BasicUnicode.consonant] + BasicUnicode.lastLetter;
-                                }
-                                else
-                                {
-                                    //종성을 합칠 수 있는지 보기
-                                    if (lastAddDict.ContainsKey(((int)tempHangeul[2], (int)charList[listIndex] - BasicUnicode.consonant)))
-                                    {
-                                        tempHangeul[2] = lastAddDict[((int)tempHangeul[2], (int)charList[listIndex] - BasicUnicode.consonant)] + BasicUnicode.lastLetter;
-                                    }
-                                    else
-                                    {
-                                        //합칠 수 없을 때 초성 으로 빼내기
-                                        hasOut = true;
-                                        outString += MergeOneChar(Convert.ToChar(tempHangeul[0]), Convert.ToChar(tempHangeul[1]), Convert.ToChar(tempHangeul[2])).ToString();
-                                        tempHangeul[0] = charList[listIndex];
-                                        tempHangeul[1] = null;
-                                        tempHangeul[2] = null;
-                                        hasVowel = false;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            //모음이 없을 경우 (초성)
-                            if (hasOut)
-                            {
-                                //해당 사항 없을듯
-                            }
-                            else
-                            {
-
-                            }
-                        }
-                    }
-                    else if (hangeulVowelInput.Contains(_char))
-                    {
-                        //모음일 경우
-                        if(listIndex == 0)
-                        {
-                            //처음 모음이 나온 경우
-                            tempHangeul[1] = charList[0];
-                            hasVowel = true;
-                        }
-                        else if (hasCons)
-                        {
-                            //자음이 나온 경우
-                            if (hasVowel)
-                            {
-                                //모음도 나온 경우
-                                tempHangeul[1] = middleAddDict[((int)tempHangeul[1], (int)charList[listIndex])];
-                            }
-                            else
-                            {
-                                //모음이 처음인 경우
-                                tempHangeul[1] = charList[listIndex];
-                                hasVowel = true;
-                            }
-                        }
-                        else
-                        {
-                            //문자가 미리 나온 경우 ex)곬ㅗ -> 골소
-                        }
-                    }
-                    else
-                    {
-                        //특문?
-                        subString = _char.ToString();
+                        subString += MergeCharBySplitIndex(SplitCharacterIndex[splitIndex], SplitCharacterIndex[splitIndex + 1]);
                     }
                 }
-                #endregion
-
-                // 임시
-                subString = Convert.ToChar(charList[0]).ToString();
                 return;
-
-                //스페이스 키일 경우 분리 시키기
-                //마지막 리스트와 
             }
         }
 
-        private char MergeOneChar(char? _first, char? _middle, char? _last)
-        {
-            //초성, 중성, 종성의 유니코드 값이 아닐경우, 여기서 변경하기
-            
-            //한글 합치기!(한글 이외의 것은 오류가 날 수 있음)
-            //주의 : 초성, 중성, 종성의 유니코드 값은 그 집단에 속한 유니코드 값이어야 함
-            if (_first == null)
-            {
-                return (char)_middle;
-            }
-            else if (_middle == null)
-            {
-                return (char)_first;
-            }
-            else if (_last == null)
-            {
-                return Convert.ToChar(BasicUnicode.full + (((int)_first - BasicUnicode.firstLetter) * 21 + (int)_middle - BasicUnicode.middleLetter) * 28);
-            }
-            else
-            {
-                return Convert.ToChar(BasicUnicode.full + (((int)_first - BasicUnicode.firstLetter) * 21 + (int)_middle - BasicUnicode.middleLetter) * 28 + (int)_last - BasicUnicode.lastLetter + 1);
-            }
-        }
 
         #region check CGI key func
-        private void CheckChangeCGISpecialKey()
+        private void CheckChangeCGISpecialKey(char? _key)
         {
             if (".,?!".Contains(Convert.ToChar(charList[0])) && _key == '.')
             {
@@ -420,7 +271,7 @@ namespace HangeulKeyBoard.MergeManager
             }
         }
 
-        private void CheckChangeCGIVowelKey()
+        private void CheckChangeCGIVowelKey(char? _key)
         {
             if (CGIMiddleAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
             {
@@ -430,7 +281,7 @@ namespace HangeulKeyBoard.MergeManager
             }
         }
 
-        private void CheckChangeCGIConsonantKey()
+        private void CheckChangeCGIConsonantKey(char? _key)
         {
             if (CGIFirstAddDict.ContainsKey((Convert.ToChar(charList[charList.Count - 2]), _key)))
             {
@@ -443,31 +294,6 @@ namespace HangeulKeyBoard.MergeManager
 
         #endregion
 
-        #region InputKey
-        //문자를 입력받을 때 합칠수 있을만큼 합치고 나머지는 내보냅니다.
-        public string InputKey(char _key)
-        {
-            if (isPoped)
-            {
-                subString = null;
-            }
-
-            if (canMerge(_key))
-            {
-                Merge(_key);
-                //합치면서 내놓는 값이 있을 수 있음!
-                return null;
-            }
-            else
-            {
-                //모음이 들어올 때 앞의 자음을 남겨두는 방법을 고려해야 함
-                Clear(_key);
-                isPoped = true;
-                return subString;
-            }
-        }
-        #endregion
-
         #region Clear
         //Clear
         public void Clear()
@@ -475,7 +301,6 @@ namespace HangeulKeyBoard.MergeManager
             charList.Clear();
             subString = null;
             isPoped = false;
-            isHanguel = true;
         }
 
         private void Clear(char? _key)
@@ -493,44 +318,211 @@ namespace HangeulKeyBoard.MergeManager
 
         #endregion
 
+        #region split list by character
+
         public void SpiltListByCharacter()
         {
             SplitCharacterIndex.Clear();
-            SplitCharacterIndex.Add(0);
 
-            bool isPreviousConsonant = false;
-            bool isPreviousVowel = false;
-            bool hasVowel = false;
-            bool hasConsonant = false;
-            int firstIndex = 0;
+            SplitResetBoolean();
 
             for (int index = 0; index < charList.Count; index++)
             {
-                if (hangeulVowelInput.Contains(Convert.ToChar(charList)))
+                //모음
+                if (hangeulVowelInput.Contains(Convert.ToChar(charList[index])))
                 {
-                    if (isPreviousConsonant)
-                    {
-                        isPreviousConsonant = false;
-
-                    }
-                }else if (hangeulConsonantInput.Contains(Convert.ToChar(charList)))
+                    SplitCheckMergePossibleVowel(index);
+                }
+                //자음
+                else if (hangeulConsonantInput.Contains(Convert.ToChar(charList[index])))
                 {
-
+                    SplitCheckMergePossibleConsonant(index);
                 }
                 else
                 {
                     //조합이 안되는 경우
                     SplitCharacterIndex.Add(index);
+                    splitFirstIndex = index;
+                }
+            }
+
+            Console.WriteLine("y " + Convert.ToString(charList.Count));
+            SplitCharacterIndex.Add(charList.Count);
+        }
+
+        //모음
+        private void SplitCheckMergePossibleVowel(int _index)
+        {
+            //자음 바로 앞 (결합)
+            if (splitIsPreviousConsonant)
+            {
+                Console.WriteLine("z " + Convert.ToString(_index - 1));
+                SplitCharacterIndex.Add(_index - 1);
+                splitHasTwoLastVowel = false;
+            }
+            //모음 바로 앞
+            else if (splitIsPreviousVowel)
+            {
+                Console.WriteLine("a " + Convert.ToString(_index));
+                SplitCharacterIndex.Add(_index);
+                SplitResetBoolean();
+            }
+            else
+            {
+                Console.WriteLine("b " + Convert.ToString(_index));
+                SplitCharacterIndex.Add(_index);
+                SplitResetBoolean();
+            }
+            splitHasVowel = true;
+            splitIsPreviousConsonant = false;
+            splitIsPreviousVowel = true;
+        }
+
+        //자음
+        private void SplitCheckMergePossibleConsonant(int _index)
+        {
+            //자음 바로 앞
+            if (splitIsPreviousConsonant)
+            {
+                if (splitHasVowel)
+                {
+                    //종성 위치
+                    if (splitHasTwoLastVowel)
+                    {
+                        Console.WriteLine("d " + Convert.ToString(_index));
+                        SplitCharacterIndex.Add(_index);
+                        SplitResetBoolean();
+                    }
+                    else if (lastAddDict.ContainsKey( ((int)charList[_index - 1] - BasicUnicode.consonant, (int)charList[_index] - BasicUnicode.consonant) ))
+                    {
+                        splitHasTwoLastVowel = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("e " + Convert.ToString(_index));
+                        SplitCharacterIndex.Add(_index);
+                        SplitResetBoolean();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("f " + Convert.ToString(_index));
+                    //초성 위치
+                    SplitCharacterIndex.Add(_index);
+                    SplitResetBoolean();
+                }
+            }
+            //모음 바로 앞
+            else if (splitIsPreviousVowel)
+            {
+                if (!splitHasConsonant)
+                {
+                    Console.WriteLine("g " + Convert.ToString(_index - 1));
+                    SplitCharacterIndex.Add(_index - 1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("h " + Convert.ToString(_index));
+                SplitCharacterIndex.Add(_index);
+                SplitResetBoolean();
+            }
+
+            splitHasConsonant = true;
+            splitIsPreviousConsonant = true;
+            splitIsPreviousVowel = false;
+        }
+
+        private void SplitResetBoolean()
+        {
+            splitIsPreviousConsonant = false;
+            splitIsPreviousVowel = false;
+            splitHasConsonant = false;
+            splitHasVowel = false;
+            splitHasTwoLastVowel = false;
+        }
+
+        #endregion
+
+        #region merge char by split
+        public char MergeCharBySplitIndex(int _firstIndex, int _lastIndex)
+        {
+            int diff = _lastIndex - _firstIndex;
+            if (diff == 0)
+                return ' ';
+            else if (diff == 1)
+                return Convert.ToChar(charList[_firstIndex]);
+            else if (diff == 2)
+                return MergeOneChar(charList[_firstIndex], charList[_firstIndex + 1], null);
+            else if (diff == 3)
+                return MergeOneChar(charList[_firstIndex], charList[_firstIndex + 1], charList[_firstIndex + 2]);
+            else // 4
+            {
+                return MergeOneChar(charList[_firstIndex], charList[_firstIndex + 1],
+                    lastAddDict[((int)charList[_firstIndex + 2] - BasicUnicode.consonant, (int)charList[_firstIndex + 3] - BasicUnicode.consonant)] + BasicUnicode.lastLetter);
+            }
+        }
+
+        private char MergeOneChar(int? _first, int? _middle, int? _last)
+        {
+            //한글 합치기!(한글 이외의 것은 오류가 날 수 있음)
+            if (_first != null)
+            {
+                if(_middle == null)
+                {
+                    return (char)_first;
+                }
+
+                if((int)_first >= BasicUnicode.consonant)
+                {
+                    _first = consonantToFirstDict[Convert.ToInt32(_first) - BasicUnicode.consonant];
+                }else if ((int)_first >= BasicUnicode.firstLetter)
+                {
+                    _first -= BasicUnicode.firstLetter;
+                }
+            }
+
+            if(_middle != null)
+            {
+                if(_first == null)
+                {
+                    return (char)_middle;
+                }
+
+                if ((int)_middle >= BasicUnicode.vowel)
+                {
+                    _middle = _middle - BasicUnicode.vowel;
+                    Console.WriteLine((int)_middle);
+                }else if((int)_middle >= BasicUnicode.middleLetter)
+                {
+                    _middle -= BasicUnicode.middleLetter;
+                }
+            }
+
+            if(_last != null)
+            {
+                if ((int)_last >= BasicUnicode.consonant)
+                {
+                    _last = consonantToLastDict[(int)_last - BasicUnicode.consonant];
+                }else if((int)_last >= BasicUnicode.lastLetter)
+                {
+                    _last -= BasicUnicode.lastLetter;
                 }
             }
 
 
-            SplitCharacterIndex.Add(charList.Count);
+            //주의 : 초성, 중성, 종성의 유니코드 값은 그 집단에 속한 유니코드 값이어야 함
+            if (_last == null)
+            {
+                Console.WriteLine(BasicUnicode.full + (((int)_first) * 21 + (int)_middle) * 28);
+                return Convert.ToChar(BasicUnicode.full + (((int)_first) * 21 + (int)_middle) * 28);
+            }
+            else
+            {
+                return Convert.ToChar(BasicUnicode.full + (((int)_first) * 21 + (int)_middle) * 28 + (int)_last + 1);
+            }
         }
 
-        public char MergeCharBySplitIndex(int _firstIndex, int _lastIndex)
-        {
-            return '0';
-        }
+        #endregion
     }
 }
