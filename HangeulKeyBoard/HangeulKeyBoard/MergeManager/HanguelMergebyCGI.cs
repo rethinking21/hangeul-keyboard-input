@@ -22,10 +22,9 @@ namespace HangeulKeyBoard.MergeManager
         bool splitHasConsonant = false;
         bool splitHasVowel = false;
         bool splitHasTwoLastVowel = false;
-        int splitFirstIndex = 0;
 
         private List<int> SplitCharacterIndex = new List<int>();
-
+        private List<int> voidSpaceIndex = new List<int>();
         public class MergeSetting
         {
         }
@@ -181,9 +180,11 @@ namespace HangeulKeyBoard.MergeManager
             'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' };
         //들어올 수 있는 모음 입력값
         private readonly char[] hangeulVowelInput = {
-            'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ',
-            'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ',
-            'ㅐ', 'ㅒ', 'ㅔ', 'ㅖ' };
+            'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ',
+            'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
+            'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ',
+            'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ',
+            'ㅣ'};
 
         #endregion
 
@@ -227,6 +228,10 @@ namespace HangeulKeyBoard.MergeManager
         {
             if (_key != null)
             {
+                if (_key == '\b')
+                {
+                    charList.RemoveAt(charList.Count - 1);
+                }
                 charList.Add(Convert.ToInt32(_key));
             }
 
@@ -248,10 +253,13 @@ namespace HangeulKeyBoard.MergeManager
                 subString = "";
                 for (int splitIndex = 0; splitIndex < SplitCharacterIndex.Count - 1; splitIndex++)
                 {
-                    Console.WriteLine(Convert.ToString(splitIndex) + "  " + Convert.ToString(SplitCharacterIndex[splitIndex]));
                     if (SplitCharacterIndex[splitIndex] < SplitCharacterIndex[splitIndex + 1])
                     {
-                        subString += MergeCharBySplitIndex(SplitCharacterIndex[splitIndex], SplitCharacterIndex[splitIndex + 1]);
+                        char? charOutput = MergeCharBySplitIndex(SplitCharacterIndex[splitIndex], SplitCharacterIndex[splitIndex + 1]);
+                        if (charOutput != null)
+                        {
+                            subString += charOutput.ToString();
+                        }
                     }
                 }
                 return;
@@ -323,13 +331,14 @@ namespace HangeulKeyBoard.MergeManager
         public void SpiltListByCharacter()
         {
             SplitCharacterIndex.Clear();
+            voidSpaceIndex.Clear();
 
             SplitResetBoolean();
 
             for (int index = 0; index < charList.Count; index++)
             {
                 //모음
-                if (middleIndex.Contains(Convert.ToChar(charList[index])) && !(charList[index] == 'ㆍ' && charList[index] == 'ᆢ'))
+                if (hangeulVowelInput.Contains(Convert.ToChar(charList[index])))
                 {
                     SplitCheckMergePossibleVowel(index);
                 }
@@ -340,13 +349,18 @@ namespace HangeulKeyBoard.MergeManager
                 }
                 else
                 {
+                    //띄어쓰기
+                    if (Convert.ToChar(charList[index]) == ' ' &&
+                    (splitIsPreviousConsonant || splitIsPreviousConsonant))
+                    {
+                        voidSpaceIndex.Add(index);
+                    }
+
                     //조합이 안되는 경우
                     SplitCharacterIndex.Add(index);
-                    splitFirstIndex = index;
+                    SplitResetBoolean();
                 }
             }
-
-            Console.WriteLine("y " + Convert.ToString(charList.Count));
             SplitCharacterIndex.Add(charList.Count);
         }
 
@@ -356,20 +370,17 @@ namespace HangeulKeyBoard.MergeManager
             //자음 바로 앞 (결합)
             if (splitIsPreviousConsonant)
             {
-                Console.WriteLine("z " + Convert.ToString(_index - 1));
                 SplitCharacterIndex.Add(_index - 1);
                 splitHasTwoLastVowel = false;
             }
             //모음 바로 앞
             else if (splitIsPreviousVowel)
             {
-                Console.WriteLine("a " + Convert.ToString(_index));
                 SplitCharacterIndex.Add(_index);
                 SplitResetBoolean();
             }
             else
             {
-                Console.WriteLine("b " + Convert.ToString(_index));
                 SplitCharacterIndex.Add(_index);
                 SplitResetBoolean();
             }
@@ -386,12 +397,9 @@ namespace HangeulKeyBoard.MergeManager
             {
                 if (splitHasVowel)
                 {
-                    Console.WriteLine((int)charList[_index - 1] - BasicUnicode.consonant);
-                    Console.WriteLine((int)charList[_index] - BasicUnicode.consonant );
                     //종성 위치
                     if (splitHasTwoLastVowel)
                     {
-                        Console.WriteLine("d " + Convert.ToString(_index));
                         SplitCharacterIndex.Add(_index);
                         SplitResetBoolean();
                     }
@@ -401,14 +409,12 @@ namespace HangeulKeyBoard.MergeManager
                     }
                     else
                     {
-                        Console.WriteLine("e " + Convert.ToString(_index));
                         SplitCharacterIndex.Add(_index);
                         SplitResetBoolean();
                     }
                 }
                 else
                 {
-                    Console.WriteLine("f " + Convert.ToString(_index));
                     //초성 위치
                     SplitCharacterIndex.Add(_index);
                     SplitResetBoolean();
@@ -419,13 +425,11 @@ namespace HangeulKeyBoard.MergeManager
             {
                 if (!splitHasConsonant)
                 {
-                    Console.WriteLine("g " + Convert.ToString(_index - 1));
                     SplitCharacterIndex.Add(_index - 1);
                 }
             }
             else
             {
-                Console.WriteLine("h " + Convert.ToString(_index));
                 SplitCharacterIndex.Add(_index);
                 SplitResetBoolean();
             }
@@ -447,13 +451,21 @@ namespace HangeulKeyBoard.MergeManager
         #endregion
 
         #region merge char by split
-        public char MergeCharBySplitIndex(int _firstIndex, int _lastIndex)
+        public char? MergeCharBySplitIndex(int _firstIndex, int _lastIndex)
         {
             int diff = _lastIndex - _firstIndex;
             if (diff == 0)
-                return ' ';
-            else if (diff == 1)
-                return Convert.ToChar(charList[_firstIndex]);
+                return null;
+            else if (diff == 1) {
+                if (voidSpaceIndex.Contains(_firstIndex))
+                {
+                    return null;
+                }
+                else
+                {
+                    return Convert.ToChar(charList[_firstIndex]);
+                }
+            }
             else if (diff == 2)
                 return MergeOneChar(charList[_firstIndex], charList[_firstIndex + 1], null);
             else if (diff == 3)
@@ -494,7 +506,6 @@ namespace HangeulKeyBoard.MergeManager
                 if ((int)_middle >= BasicUnicode.vowel)
                 {
                     _middle = _middle - BasicUnicode.vowel;
-                    Console.WriteLine((int)_middle);
                 }else if((int)_middle >= BasicUnicode.middleLetter)
                 {
                     _middle -= BasicUnicode.middleLetter;
@@ -516,7 +527,6 @@ namespace HangeulKeyBoard.MergeManager
             //주의 : 초성, 중성, 종성의 유니코드 값은 그 집단에 속한 유니코드 값이어야 함
             if (_last == null)
             {
-                Console.WriteLine(BasicUnicode.full + (((int)_first) * 21 + (int)_middle) * 28);
                 return Convert.ToChar(BasicUnicode.full + (((int)_first) * 21 + (int)_middle) * 28);
             }
             else
