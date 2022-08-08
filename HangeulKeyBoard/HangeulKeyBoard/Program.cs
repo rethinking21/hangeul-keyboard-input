@@ -49,6 +49,10 @@ namespace HangeulKeyBoard
             Console.WriteLine(myLetterMerge.GetString());
             myLetterMerge.InputKey('ㅇ');
             Console.WriteLine(myLetterMerge.GetString());
+
+            myLetterMerge.ClearString();
+            myLetterMerge.InputKey('ㅇ');
+            Console.WriteLine(myLetterMerge.GetString());
         }
     }
 }

@@ -102,6 +102,11 @@ namespace HangeulKeyBoard.MergeManager
             subString = null;
             isChanged = false;
         }
+
+        public void ClearString()
+        {
+            mergeMethod.Clear();
+        }
     }
 
 }
